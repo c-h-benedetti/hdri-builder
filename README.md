@@ -48,6 +48,8 @@ These values will be used as weights, to mix all the differents pixels values in
 This way to proceed generates visible seams into our output. To get a clean mixing, usage of a Laplacian pyramid is required.
 Through the multiple resolutions proposed by each floor of the pyramid, we can achieve a seamless mixing
 
+![Example of a 8 floors Gaussian pyramid (expended)](output/gaussian_pyramid.png)
+
   Before opti:
 Exec time: 9.0085421436 seconds
 
