@@ -1,11 +1,12 @@
 # HDRI Builder
 -------------
 
-Project in Python (OpenCV & NumPy)
-**/!\ The list of features exposed bellow is not complete, it simply represents the task with the highest priority**
-Ressources: https://app.milanote.com/1JLgty1M5LQ09h?p=gsA2e1Hp2IB
+Project in Python (OpenCV & NumPy)  
+**/!\ The list of features exposed bellow is NOT complete, it simply represents the task with the highest priority**  
+_Ressources:_ https://app.milanote.com/1JLgty1M5LQ09h?p=gsA2e1Hp2IB
 
-##Basic features of an HDRI builder:
+
+## Basic features of an HDRI builder:
   - Create an HDRI from a set of bracketed pictures
   - Basic noise and (motion)blur reduction
   - Ghosting removal
@@ -34,14 +35,14 @@ Ressources: https://app.milanote.com/1JLgty1M5LQ09h?p=gsA2e1Hp2IB
 
 -------------
 
-##Current task:
+### Current task:
   ✑ Build Laplacian pyramid for RGB images
   *✓ Build Gaussian pyramid for RGB images*
   *✓ Build Gaussian pyramid for single-channel images*
 
 -------------
 
-##Current task details:
+## Current task details:
 
 Creation of an HDRI requires to process a set of values for each image of the set.
 These values will be used as weights, to mix all the differents pixels values in order to form the final image.
@@ -50,8 +51,8 @@ Through the multiple resolutions proposed by each floor of the pyramid, we can a
 
 ![Example of a 8 floors Gaussian pyramid (expended)](output/gaussian_pyramid.png)
 
-  Before opti:
-Exec time: 9.0085421436 seconds
+  **Before opti:**
+*Exec time: 9.0085421436 seconds*
 
-  After opti
-Exec time: 2.7509577274 seconds  
+  **After opti**
+*Exec time: 2.7509577274 seconds*
