@@ -1,15 +1,11 @@
 import cv2 as ocv
 import numpy as np
-import time
-
-start_time = 0.0
-previous = 0.0
-laps = []
+import time_stamp as ts
 
 # On suppose que l'image passée en argument a une taille qui marchera avec le filtre et le shift voulu
 
 def convolve(imIn, kernel, shift, pad):
-    tour("convolve start")
+    ts.tour("convolve start")
     # Isolation de la forme de l'image ET du filtre
     (i_height, i_width) = imIn.shape
     (k_height, k_width) = kernel.shape
@@ -44,13 +40,13 @@ def convolve(imIn, kernel, shift, pad):
         c_out = 0
         l_out += 1
 
-    tour("convolve done")
+    ts.tour("convolve done")
 
     return output
 
 
 def gaussian_pyramid_mono(imIn, threshold=10, stop=5):
-    tour("gaussian mono start")
+    ts.tour("gaussian mono start")
     # Acquisition des données de l'image de base
     (i_height, i_width) = imIn.shape
     nb_pixels = i_height * i_width
@@ -68,22 +64,22 @@ def gaussian_pyramid_mono(imIn, threshold=10, stop=5):
         nb_pixels = i_height * i_width
         count += 1
 
-    tour("gaussian mono done")
+    ts.tour("gaussian mono done")
 
     return maps
 
 # Fonction qui écrit toutes les images qui lui sont passées sous la forme d'un tableau
 def write_maps(maps, base_nom):
-    tour("starting writing maps")
+    ts.tour("starting writing maps")
     for index, map in enumerate(maps):
         nom = base_nom + "_" + str(index) + ".png"
         entiers = map.astype(int)
         ocv.imwrite(nom, entiers)
-    tour("maps written")
+    ts.tour("maps written")
 
 # Fonction qui étend les maps gaussiennes à la taille de l'image génératrice
 def expend(maps):
-    tour("expending ...")
+    ts.tour("expending ...")
     target = maps[0].shape
     output = []
     factor = 1.0
@@ -100,13 +96,13 @@ def expend(maps):
 
         output.append(canvas)
         factor /= 2.0
-    tour("expending done")
+    ts.tour("expending done")
     return output
 
 
 
 def gaussian_pyramid_old(imIn):
-    tour("starting batch gaussian pyramid")
+    ts.tour("starting batch gaussian pyramid")
     # Forme de l'image, profondeur comprise
     sp = imIn.shape
     # Canaux de l'image Gr || BGR
@@ -143,12 +139,12 @@ def gaussian_pyramid_old(imIn):
     else:
         final_maps = list_maps[0]
         pass
-    tour("batch gaussian done")
+    ts.tour("batch gaussian done")
     return final_maps
 
 
 def gaussian_pyramid(imIn):
-    tour("starting batch gaussian pyramid")
+    ts.tour("starting batch gaussian pyramid")
     # Forme de l'image, profondeur comprise
     sp = imIn.shape
     # Canaux de l'image Gr || BGR
@@ -190,80 +186,21 @@ def gaussian_pyramid(imIn):
     else:
         final_maps = list_maps[0]
         pass
-    tour("batch gaussian done")
+    ts.tour("batch gaussian done")
     return final_maps
 
-
-def testing():
-    # Image test fake 
-    img_sz = 7
-    #img = np.arange(img_sz * img_sz).reshape(img_sz, img_sz)
-    img = np.ones((img_sz, img_sz))
-    img *= 2
-    print(img)
-    print("")
-
-    # Filtre test fake
-    filtre = np.ones((5, 5)) / (5 * 5)
-    print(filtre)
-    print("")
-
-    # Settings
-    shift = 2
-    pad = 2
-
-    output = convolve(img, filtre, shift, pad)
-    print(output)
-
-
-def testing_2():
-    img = ocv.imread("data/basketball1.png", 0)
-    filtre = np.ones((5, 5)) / (5 * 5)
-    shift = 2
-    pad = 2
-
-    output = convolve(img, filtre, shift, pad)
-    ocv.imwrite("basket_gauss.png", output)
-
-def testing_3():
-    img = ocv.imread("data/basketball1.png", 0)
-    maps = gaussian_pyramid_mono(img, 20, 10)
-    write_maps(maps, "g_map_raw")
-    maps = expend(maps)
-    write_maps(maps, "g_map_exp")
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#            TESTING                                                                        #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 def testing_4():
     img = ocv.imread("data/basketball1.png", 0)
     img2 = ocv.imread("data/baboon.jpg", -1)
     maps1 = gaussian_pyramid(img)
     maps2 = gaussian_pyramid(img2)
-    write_maps(maps1, "g_map_bw")
-    write_maps(maps2, "g_map_rgb")
+    write_maps(maps1, "output/g_map_bw")
+    write_maps(maps2, "output/g_map_rgb")
     pass
-
-def disp_laps():
-    for lap in laps:
-        print(lap)
-
-def write_laps(file):
-    f = open(file, "w")
-    for lap in laps:
-        f.write(lap[0] + str(lap[1]) +'\n')
-    f.close()
-
-def tour(txt):
-    global previous
-    if(len(txt) > 32):
-        print("Warning: Text too long")
-        txt = txt[0:32]
-    
-    missing = 32 - len(txt)
-    missing = " " * missing
-
-    elapsed = time.time() - previous
-    elapsed = round(elapsed, 4)
-    laps.append((txt + missing + "|   ", elapsed))
-    previous = time.time()
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #            MAIN()                                                                         #
@@ -277,11 +214,9 @@ def main():
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 
-start_time = time.time()
-previous = start_time
-tour("start")
+ts.tour("--- Start ---")
 main()
-tour("end")
-laps = sorted(laps, key=lambda tup: tup[1], reverse=True)
-write_laps("times_1.log")
-print("--- %s seconds ---" % (time.time() - start_time))
+ts.tour("--- End ---")
+
+ts.sort_laps(ts.TimeSort.LONGER)
+ts.write_laps("time_stamp_test.log")
