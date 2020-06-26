@@ -36,9 +36,9 @@ _Ressources:_ https://app.milanote.com/1JLgty1M5LQ09h?p=gsA2e1Hp2IB
 -------------
 
 ### Current task:
-  ✑ Build Laplacian pyramid for RGB images
-  *✓ Build Gaussian pyramid for RGB images*
-  *✓ Build Gaussian pyramid for single-channel images*
+  ✑ Build Laplacian pyramid for RGB images  
+  *✓ Build Gaussian pyramid for RGB images*  
+  *✓ Build Gaussian pyramid for single-channel images*  
 
 -------------
 
