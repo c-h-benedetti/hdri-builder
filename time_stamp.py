@@ -6,8 +6,8 @@ from enum import Enum
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 start_time = 0.0
-previous = 0.0
-laps = []
+previous = {}
+laps = {}
 text_size_limit = 32
 round_time = 5
 separator = "|"
@@ -17,14 +17,17 @@ buffer_limit = 100
 #     TIME STAMP FUCTIONS                                                           #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-# Adds a new lap to the buffer, regarding the max size of the buffer.
-# Max size can be ignored
+# Adds a new lap to the buffer
 
-def add_lap(lap, ignore_size=False):
+def add_lap(lap, id):
     global laps
-    if((len(laps) >= buffer_limit) and (not ignore_size)):
-        laps.pop(0)
-    laps.append(lap)
+    
+    if(id in laps):
+        laps[id].append(lap)
+        pass
+    else:
+        laps[id] = [lap]
+        pass
 
 # Erases all saved values and considers curent time as entry of program
 # Argument enables to reset the laps without modifying the starting time
@@ -34,8 +37,8 @@ def reset(all_vars=False):
     global previous
     global start_time
 
-    laps = []
-    previous = time.time()
+    laps = {}
+    previous = {}
 
     if(all_vars):
         start_time = time.time()
@@ -44,9 +47,8 @@ def reset(all_vars=False):
 # Measures the time ellaŝed between two calls of this function, with 'txt' as log-line
 # Automatic saving in a list
 
-def tour(txt):
+def tour(txt, id):
     global previous
-    global laps
 
     if(len(txt) > text_size_limit):
         print("Warning: Text too long")
@@ -55,23 +57,39 @@ def tour(txt):
     missing = text_size_limit - len(txt)
     missing = " " * missing
 
-    elapsed = time.time() - previous
-    elapsed = round(elapsed, round_time)
-    add_lap([(txt + missing + separator + "   "), elapsed])
-    previous = time.time()
+    if(id in previous): # Deja init dans cette fonction
+        elapsed = time.time() - previous[id]
+        elapsed = round(elapsed, round_time)
+        add_lap([(txt + missing + separator + "   "), elapsed], id)
+        previous[id] = time.time()
+        pass
+    else:
+        elapsed = 0.0
+        add_lap([(txt + missing + separator + "   "), elapsed], id)
+        previous[id] = time.time()
+        pass
+
+    
 
 # Displays all 
 
 def disp_laps():
-    for lap in laps:
-        print(lap[0] + str(lap[1]))
+    for key in laps.keys():
+        print(key)
+        for lap in laps[key]:
+            print(lap[0] + str(lap[1]))
+        print("\n")
 
 # Writes the saved laps in the file specified as parameter
 
 def write_laps(file, write_all=True):
     f = open(file, "w")
-    for lap in laps:
-        f.write(lap[0] + str(lap[1]) +'\n')
+
+    for key in laps.keys():
+        f.write("          ###  " + str(key) + "  ###\n")
+        for lap in laps[key]:
+            f.write(lap[0] + str(lap[1]) + "\n")
+        f.write("\n\n")
 
     if(write_all):
         s = ("\n\nTOTAL:\n    %s seconds  " % (time.time() - start_time))
@@ -96,17 +114,18 @@ class TimeSort(Enum):
 
 def sort_laps(sorting=TimeSort.DEFAULT):
     global laps
-    if(sorting == TimeSort.DEFAULT):
-        pass
-    elif(sorting == TimeSort.LONGER):
-        laps = sorted(laps, key=lambda tup: tup[1], reverse=True)
-        pass
-    elif(sorting == TimeSort.SHORTER):
-        laps = sorted(laps, key=lambda tup: tup[1])
-        pass
-    else:
-        print("Warning: Unknown sorting parameter. No sorting applied.")
-        pass
+    for cle in laps.keys():
+        if(sorting == TimeSort.DEFAULT):
+            pass
+        elif(sorting == TimeSort.LONGER):
+            laps[cle] = sorted(laps[cle], key=lambda tup: tup[1], reverse=True)
+            pass
+        elif(sorting == TimeSort.SHORTER):
+            laps[cle] = sorted(laps[cle], key=lambda tup: tup[1])
+            pass
+        else:
+            print("Warning: Unknown sorting parameter. No sorting applied.")
+            pass
 
 
 
@@ -115,4 +134,4 @@ def sort_laps(sorting=TimeSort.DEFAULT):
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 start_time = time.time()
-previous = time.time()
+previous = {}
