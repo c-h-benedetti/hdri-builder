@@ -47,6 +47,9 @@ def reset(all_vars=False):
 # Measures the time ellaŝed between two calls of this function, with 'txt' as log-line
 # Automatic saving in a list
 
+def start_function(id):
+    previous[id] = time.time()
+
 def tour(txt, id):
     global previous
 
