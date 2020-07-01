@@ -1,7 +1,11 @@
 import cv2 as ocv
 import numpy as np
 import time_stamp as ts
+import utilities as ut
 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#     CONVOLUTING AN IMAGE WITH A FILTER                                                                                    #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 def convolve(imIn, kernel, shift, pad):
     ts.start_function("convolve")
@@ -9,6 +13,9 @@ def convolve(imIn, kernel, shift, pad):
     ts.tour("Convolution done", "convolve")
     return imOut
 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#     SUBSAMPLE THE IMAGE IN PARAMETER                                                                                      #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 def sample(imIn, rate=2):
     ts.start_function("sample")
@@ -19,6 +26,10 @@ def sample(imIn, rate=2):
     ts.tour("Subsampling done", "sample")
     
     return canvas
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#     BUILDS A GAUSSIAN PYRAMID OF A SINGLE CHANNEL IMAGE                                                                   #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 def gaussian_pyramid_mono(imIn, threshold=10, stop=5):
     ts.start_function("gaussian")
@@ -44,15 +55,10 @@ def gaussian_pyramid_mono(imIn, threshold=10, stop=5):
 
     return maps
 
-# Fonction qui écrit toutes les images qui lui sont passées sous la forme d'un tableau
-def write_maps(maps, base_nom):
-    ts.start_function("writer")
-    for index, map in enumerate(maps):
-        nom = base_nom + "_" + str(index) + ".png"
-        entiers = map.astype(int)
-        ocv.imwrite(nom, entiers)
-    ts.tour("maps written", "writer")
 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#     BUILDS A GAUSSIAN PYRAMID FOR ANY IMAGE                                                                               #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 def gaussian_pyramid(imIn, complete=True):
     ts.start_function("gaussian pyramid")
@@ -79,7 +85,7 @@ def gaussian_pyramid(imIn, complete=True):
     
     for canal in canaux:
         factor = 1.0
-        maps = gaussian_pyramid_mono(canal, 20, 10)
+        maps = gaussian_pyramid_mono(canal, 10, 5)
         new_maps = []
         for map in maps:
             new_maps.append(ocv.resize(map, (sp[1],sp[0]), fx=factor, fy=factor, interpolation=ocv.INTER_LINEAR)) #interpolation=ocv.INTER_NEAREST
@@ -104,42 +110,24 @@ def gaussian_pyramid(imIn, complete=True):
             ts.tour("batch gaussian done B&W", "gaussian pyramid")
         return final_maps
 
-
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#     BUILDS A LAPLACIAN PYRAMID FOR ANY IMAGE                                                                              #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 def laplacian_pyramid(img, bw=False):
-    gaussian = gaussian_pyramid(img, False)
-    colored = gaussian[0]
-    maps = gaussian[1]
+    maps = gaussian_pyramid(img)
     maps_lapla = []
 
     ts.start_function("laplacian")
     
-    if(colored):
-        for index in range(len(maps[0]) - 1):
-            lapla_b = maps[0][index] - maps[0][index + 1] + 128
-            lapla_g = maps[1][index] - maps[1][index + 1] + 128
-            lapla_r = maps[2][index] - maps[2][index + 1] + 128
-            canvas = None
-            if(bw):
-                canvas = lapla_b + lapla_g + lapla_r
-            else:
-                canvas = ocv.merge((lapla_b,lapla_g,lapla_r))
-            
-            canvas = ocv.normalize(canvas, None, 0, 255, ocv.NORM_MINMAX)
-            maps_lapla.append(canvas)
-    else:
-        iv = 0
-        for index in range(len(maps[0]) - 1):
-            lapla = maps[0][index] - maps[0][index + 1] + 128
-            canvas = ocv.normalize(lapla, None, 0, 255, ocv.NORM_MINMAX)
-            maps_lapla.append(canvas)
+    for index in range(len(maps) - 1):
+        lapla = maps[index] - maps[index + 1] + 128
+        canvas = ocv.normalize(lapla, None, 0, 255, ocv.NORM_MINMAX)
+        maps_lapla.append(canvas)
+    maps_lapla.append(maps[-1]) # Adding last gaussian map at the end of the list to avoid data loss when the pyramid is collapsed
     
-    if(colored):
-        ts.tour("Laplacian colored done", "laplacian")
-    else:
-        ts.tour("Laplacian b&w done", "laplacian")
+    ts.tour("Laplacian done", "laplacian")
     return maps_lapla
-
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #            TESTING                                                                        #
@@ -160,29 +148,9 @@ def testing_4():
     maps2 = laplacian_pyramid(img2)
     ts.tour("LAPLACIAN IMG RGB", "testing")
 
-    write_maps(maps0, "output/gaussian/g_map_bw")
-    write_maps(maps3, "output/gaussian/g_map_rgb")
-    write_maps(maps1, "output/laplacian/g_map_bw")
-    write_maps(maps2, "output/laplacian/g_map_rgb")
+    ut.write_maps(maps0, "output/gaussian/g_map_bw")
+    ut.write_maps(maps3, "output/gaussian/g_map_rgb")
+    ut.write_maps(maps1, "output/laplacian/g_map_bw")
+    ut.write_maps(maps2, "output/laplacian/g_map_rgb")
 
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-#            MAIN()                                                                         #
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
-def main():
-    testing_4()
-    #liste_cos(7, 7, 5, 5)
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-#            TRIGGER                                                                        #
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
-
-ts.tour("--- Start ---", "main")
-main()
-ts.tour("--- End ---", "main")
-
-#ts.sort_laps(ts.TimeSort.LONGER)
-ts.write_laps("time_stamp_new_convo.log")
 

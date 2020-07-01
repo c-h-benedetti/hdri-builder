@@ -2,3 +2,7 @@ __OLD__
 data
 *.log
 __pycache__
+output
+test*
+BUILD_PLOTS
+*.plt
