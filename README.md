@@ -140,7 +140,7 @@ A pixel is gray when its R, G & B components are equals. Those pixels often part
 
 #### d. Blended weight maps:
 
-Given the fact that each value on these maps is included between 0.0 and 1.0, we can use some kind of boolean operations on them (`1.0 * 0.0 = 0.0`  **⬄** `True or False = False` ). So we get our final maps by multiplying the three previous maps.
+Given the fact that each value on these maps is included between 0.0 and 1.0, we can use some kind of boolean operations on them (`1.0 * 0.0 = 0.0`  **⬄** `True and False = False` ). So we get our final maps by multiplying the three previous maps.
 
 ![Final blended weights maps](demo/weights.png)
 We notice that the acquired results are consistent:
