@@ -2,6 +2,7 @@ import cv2 as ocv
 import numpy as np
 import time_stamp as ts
 import utilities as ut
+import cupy as cp
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #     CONVOLUTING AN IMAGE WITH A FILTER                                                                                    #
@@ -41,6 +42,8 @@ def gaussian_pyramid_mono(imIn, threshold=10, stop=5):
 
     # Filtre flou médian
     filtre = np.ones((5, 5)) / (5 * 5)
+    # Filtre flou gaussien
+    #filtre = np.array((1, 2, 1, 2, 4, 2, 1, 2, 1)).reshape((3,3)) / 16.0
     count = 0
 
     while((nb_pixels > threshold) and (count < stop)): # Sécurité de boucle infinie
@@ -60,6 +63,7 @@ def gaussian_pyramid_mono(imIn, threshold=10, stop=5):
 #     BUILDS A GAUSSIAN PYRAMID FOR ANY IMAGE                                                                               #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
+
 def gaussian_pyramid(imIn, complete=True):
     ts.start_function("gaussian pyramid")
     # Forme de l'image, profondeur comprise
@@ -67,7 +71,7 @@ def gaussian_pyramid(imIn, complete=True):
     # Canaux de l'image Gr || BGR
     canaux = []
 
-    colored = len(sp) >= 3
+    colored = (len(sp) >= 3) and (sp[2] > 1)
 
     if(not colored):
         # Image en niveaux de gris
@@ -91,6 +95,8 @@ def gaussian_pyramid(imIn, complete=True):
             new_maps.append(ocv.resize(map, (sp[1],sp[0]), fx=factor, fy=factor, interpolation=ocv.INTER_LINEAR)) #interpolation=ocv.INTER_NEAREST
             factor *= 2
         list_maps.append(new_maps)
+        del canal
+    del canaux
     
     final_maps = []
     canvas_size = list_maps[0][0].shape
@@ -102,9 +108,12 @@ def gaussian_pyramid(imIn, complete=True):
         if(colored):   
             for b,g,r in zip(list_maps[0], list_maps[1], list_maps[2]):
                 canvas = ocv.merge((b,g,r))
+                del b
+                del g
+                del r
                 final_maps.append(canvas)
                 ts.tour("batch gaussian done RGB", "gaussian pyramid")
-            pass
+            del list_maps[:]
         else:
             final_maps = list_maps[0]
             ts.tour("batch gaussian done B&W", "gaussian pyramid")
@@ -121,11 +130,11 @@ def laplacian_pyramid(img, bw=False):
     ts.start_function("laplacian")
     
     for index in range(len(maps) - 1):
-        lapla = maps[index] - maps[index + 1] + 128
-        canvas = ocv.normalize(lapla, None, 0, 255, ocv.NORM_MINMAX)
+        lapla = maps[index] - maps[index + 1] + 0.5
+        canvas = lapla #ocv.normalize(lapla, None, 0.0, 1.0, ocv.NORM_MINMAX, ocv.CV_32FC3) # lapla #/!\
         maps_lapla.append(canvas)
     maps_lapla.append(maps[-1]) # Adding last gaussian map at the end of the list to avoid data loss when the pyramid is collapsed
-    
+    del maps[0:-1]
     ts.tour("Laplacian done", "laplacian")
     return maps_lapla
 

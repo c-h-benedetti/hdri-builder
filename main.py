@@ -4,6 +4,8 @@ import features_extraction as fe
 import cv2 as ocv
 import utilities as ut
 import numpy as np
+import Sequence as sq
+import tifffile as tiff
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #            MAIN()                                                                         #
@@ -11,35 +13,20 @@ import numpy as np
 
 def main():
     
-    seq = ut.open_sequence("./test4/")
+    seq = ut.open_sequence("./test_lower/")
     weights = fe.weight_maps_sequence(seq)
-    weights = fe.balance_maps(weights)
-    blended_laplacians = fe.blend_outputs(weights, seq)
-    ut.write_maps(blended_laplacians, "blended-lap")
-    rendu = fe.collapse(blended_laplacians)
-    ocv.imwrite("HDRI-test-4.png", rendu)
-    
-    #ut.write_maps(weights, "output/weights/test-seq")
-    #hdri = fe.assemble_layers(seq, weights)
-    #ocv.imwrite("HDRI.png", hdri)
-    
-    """
-    img = ocv.imread("output/weights/test-seq_6.png")
-    maps0 = cvl.gaussian_pyramid(img)
-    ut.write_maps(maps0, "gaussian_weight")
-    """
-    """
-    img = ocv.imread("data/baboon.jpg", -1)
-    lap = cvl.laplacian_pyramid(img)
-    shp = lap[0].shape
-    neutre = np.zeros(shp)
-    for i,l in enumerate(lap):
-        ocv.imwrite("lap-"+str(i)+".png", l)
-        neutre += l
+    b_weights = fe.balance_maps(weights)
+    for w in weights:
+        del w
+    del weights
+    blended_laplacians = fe.blend_outputs(b_weights, seq)
+    for w in b_weights:
+        del w
+    del b_weights
 
-    neutre = ocv.normalize(neutre, None, 0.0, 255.0, ocv.NORM_MINMAX, ocv.CV_8UC3)
-    ocv.imwrite("combined.png", neutre)
-    """
+    rendu = fe.collapse(blended_laplacians, brightness=1.3)
+    ocv.imwrite("HDRI-test-21.png", rendu)
+
 
 
 

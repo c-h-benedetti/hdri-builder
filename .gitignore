@@ -6,3 +6,4 @@ output
 test*
 BUILD_PLOTS
 *.plt
+demo/
