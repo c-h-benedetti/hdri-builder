@@ -171,7 +171,7 @@ Through the multiple resolutions proposed by each floor of the pyramid, we can a
 #### b. Collapsing pyramid (final HDRI) :
 
 Final HDR Image, without editing nor tone-mapping.
-![Final HDR Image](rule94.com/images/demo/HDRI-demo.png)
+![Final HDR Image](demo/HDRI-demo.png)
 If we look at our output compared to the pool of inputs, we notice that colors are good looking and bright as dark areas are detailed.
 
 ## 4. Image stitching for 360°x180° image *[WIP]* :
