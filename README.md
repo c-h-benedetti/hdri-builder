@@ -43,7 +43,7 @@ _Ressources:_ https://app.milanote.com/1JLgty1M5LQ09h?p=gsA2e1Hp2IB
 
 - [ ] Create an animated HDRI from (360-HDRI-canvas + HDR-Videos)
 
-- [ ] Create a HDRI "ready-to-use", that doesn't require previous tone-mapping
+- [X] Create a HDRI "ready-to-use", that doesn't require previous tone-mapping
 
 - [ ] Generation / usage LUTs
 
@@ -53,7 +53,7 @@ _Ressources:_ https://app.milanote.com/1JLgty1M5LQ09h?p=gsA2e1Hp2IB
 
 - [ ] AI boost to create HDRI from a single picture
 
-- [ ] Create a HDRI to .hdr or
+- [ ] Create a HDRI (simple or animated patches)
 
   
 
@@ -73,22 +73,24 @@ _Ressources:_ https://app.milanote.com/1JLgty1M5LQ09h?p=gsA2e1Hp2IB
 
 ## 2. Current tasks:
 
-- [ ] Process influence weight for each pixel of each bracketed image
+- [ ] Make correct projection of stitched image
 
-- [ ] Process Harris points for future image stitching
+- [X] Process influence weight for each pixel of each bracketed image
 
--  [x]  *Build Laplacian pyramid for RGB images*
+- [X] Process Harris points for future image stitching
 
--  [x]  *Build Gaussian pyramid for RGB images*
+- [x]  *Build Laplacian pyramid for RGB images*
 
--  [x]  *Build Gaussian pyramid for single-channel images*
+- [x]  *Build Gaussian pyramid for RGB images*
+
+- [x]  *Build Gaussian pyramid for single-channel images*
 
   
 
 ## 3. Implementation of the tone-mapping-less HDRI generator:
 
 ### A. Original pictures with bracketed exposure time:  
-  ![Set of 6 original images bracketed to different exposure times](https://rule94.com/images/demo/originals.png)
+  ![Set of 6 original images bracketed to different exposure times](rule94.com/images/demo/originals.png)
 
 ### B. Weight maps :
 
@@ -123,24 +125,24 @@ Kernel of the Laplacian filter:
 	</tr>  
 </table>  
 
-![Contrast maps](https://rule94.com/images/demo/contrast.png)
+![Contrast maps](rule94.com/images/demo/contrast.png)
 
 #### b. Exposure map :
   In this map, we want to give a high importance to non-extreme pixels values (black or white). In order to do so, we will use a fonction mapping each value according a Gaussian repartition: 
   <a href="https://www.codecogs.com/eqnedit.php?latex=importance&space;=&space;e^{-\frac{(i&space;-&space;0.5)^2}{2\sigma&space;^2}}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?importance&space;=&space;e^{-\frac{(i&space;-&space;0.5)^2}{2\sigma&space;^2}}" title="importance = e^{-\frac{(i - 0.5)^2}{2\sigma ^2}}" /></a>
   with *i*, the pixel's value
-  ![Exposure maps](https://rule94.com/images/demo/exposure.png)
+  ![Exposure maps](rule94.com/images/demo/exposure.png)
 
 #### c. Saturation map:
 
 A pixel is gray when its R, G & B components are equals. Those pixels often part of dark areas in pictures, and we are not very interested in them. The saturation of a pixel increases as its three components are far from the average. This is the processing of the standard deviation.
-![Saturation maps](https://rule94.com/images/demo/saturation.png)
+![Saturation maps](rule94.com/images/demo/saturation.png)
 
 #### d. Blended weight maps:
 
 Given the fact that each value on these maps is included between 0.0 and 1.0, we can use some kind of boolean operations on them (`1.0 * 0.0 = 0.0`  **⬄** `True or False = False` ). So we get our final maps by multiplying the three previous maps.
 
-![Final blended weights maps](https://rule94.com/images/demo/weights.png)
+![Final blended weights maps](rule94.com/images/demo/weights.png)
 We notice that the acquired results are consistent:
 - Most of the color comes from the first image
 - The outdoor by night is from the first picture as well
@@ -161,7 +163,7 @@ On the following examples, gray-128 areas testifies to a data-less spot, as dark
 If we build the L-pyramid of each input image, and the Gaussian pyramid of each weight map (a Gaussian pyramid is simply a Laplacian pyramid from the one redundant data was not removed on each floor), we have enough data to generate a brand new Laplacian pyramid, of which each floor is a weighted average of the whole i-th floor of input images' pyramids with i-th floor of weight-maps' Gaussian pyramids.
 
 The new 6-floored L-pyramid generated:
-![Laplacian pyramid](https://rule94.com/images/demo/laplacians.png)
+![Laplacian pyramid](rule94.com/images/demo/laplacians.png)
 
 
 Through the multiple resolutions proposed by each floor of the pyramid, we can achieve a seamless mixing.
@@ -169,15 +171,15 @@ Through the multiple resolutions proposed by each floor of the pyramid, we can a
 #### b. Collapsing pyramid (final HDRI) :
 
 Final HDR Image, without editing nor tone-mapping.
-![Final HDR Image](https://rule94.com/images/demo/HDRI-demo.png)
+![Final HDR Image](rule94.com/images/demo/HDRI-demo.png)
 If we look at our output compared to the pool of inputs, we notice that colors are good looking and bright as dark areas are detailed.
 
 ## 4. Image stitching for 360°x180° image *[WIP]* :
 To generate an 360°x180° HDRI from a video, add details to an existing HDRI or even make animated patches on a dome HDRI, we need to be abble to spacially recreate a landscape from a buntch of pictures.
 
 Input images:
-![input](https://rule94.com/images/demo/stitching.png)
+![input](rule94.com/images/demo/stitching.png)
 
 Output stitched image:
-![output](https://rule94.com/images/demo/stitching-demo.png)
+![output](rule94.com/images/demo/stitching-demo.png)
 
